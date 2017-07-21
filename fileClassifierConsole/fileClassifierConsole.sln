@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fileClassifierConsole", "fileClassifierConsole\fileClassifierConsole.csproj", "{95261E19-D664-454A-A054-1F1C8AF5043C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordSupport", "WordSupport\WordSupport.csproj", "{B2CE74C7-BDB7-47EF-B5EA-19E96511E583}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject1", "UnitTestProject1\UnitTestProject1.csproj", "{31AD8CF9-9B04-41B8-84FF-33B15EA62D6B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7A0B748-9CEE-48DA-96DD-B8011E4DB83A}"
+	ProjectSection(SolutionItems) = preProject
+		Resources\CommonWords.txt = Resources\CommonWords.txt
+		Resources\training corpus\MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.pdf = Resources\training corpus\MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.pdf
+		Resources\training corpus\MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.txt = Resources\training corpus\MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95261E19-D664-454A-A054-1F1C8AF5043C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95261E19-D664-454A-A054-1F1C8AF5043C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95261E19-D664-454A-A054-1F1C8AF5043C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95261E19-D664-454A-A054-1F1C8AF5043C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2CE74C7-BDB7-47EF-B5EA-19E96511E583}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2CE74C7-BDB7-47EF-B5EA-19E96511E583}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2CE74C7-BDB7-47EF-B5EA-19E96511E583}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2CE74C7-BDB7-47EF-B5EA-19E96511E583}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31AD8CF9-9B04-41B8-84FF-33B15EA62D6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31AD8CF9-9B04-41B8-84FF-33B15EA62D6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31AD8CF9-9B04-41B8-84FF-33B15EA62D6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31AD8CF9-9B04-41B8-84FF-33B15EA62D6B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,30 @@
+using System.IO;
+
+COMPILER Word
+	
+CHARACTERS
+
+	UpperLetter = 'A'..'Z'.
+	LowerLetter = 'a'..'z'.
+	letter = UpperLetter + LowerLetter.
+	digit = "0123456789" .
+	letterdigit = letter + digit .
+	apostrophe = "'" .
+	cr     = '\r'.
+	eol    = '\n'.
+	tab    = '\t'.
+	PM	   = "+-" .
+	other = ANY - letter - apostrophe .
+	
+TOKENS
+
+  word = { letter } [apostrophe] letter .
+  donotcare = other { other }.
+  
+IGNORE cr + tab + eol + digit 
+
+PRODUCTIONS
+
+Word = .							
+
+END Word .
