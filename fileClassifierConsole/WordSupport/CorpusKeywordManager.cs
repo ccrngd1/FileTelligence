@@ -11,20 +11,13 @@ namespace WordSupport
     public class CorpusKeywordManager
     {
         private HashSet<string> _stopList;
+        private GlobalWordList _globalKeyword = new GlobalWordList(); //this will hold all of the keywords and their total count
 
         private Hunspell hunspell;
 
         public CorpusKeywordManager()
         {
             _stopList =  new HashSet<string>();
-        }
-
-        public void ShowGlobalDictionary(SortedDictionary<string, int> sd)
-        {
-            foreach (KeyValuePair<string, int> kvp in sd)
-            {
-                Console.WriteLine("[{0}] = {1}", kvp.Key, kvp.Value);
-            }
         }
 
         public bool ReadStopList(string file)
@@ -54,7 +47,7 @@ namespace WordSupport
         public GlobalWordList Run(string directory, string resourceDirectory, string outputDirectory)
         {
             List<DocumentKeywords> keywords; //this will hold keywords for each file
-            GlobalWordList globalKeyword = new GlobalWordList(); //this will hold all of the keywords and their total count
+            
             Scanner scanner = null; 
             
             var di = new DirectoryInfo(directory);
@@ -94,26 +87,26 @@ namespace WordSupport
 
                 foreach (KeyValuePair<string, WordStats> kvp in keywords[i].WordList)
                 {
-                    if (globalKeyword.WordList.ContainsKey(kvp.Key))
+                    if (_globalKeyword.WordList.ContainsKey(kvp.Key))
                     {
-                        globalKeyword.WordList[kvp.Key].Count += kvp.Value.Count;
+                        _globalKeyword.WordList[kvp.Key].Count += kvp.Value.Count;
                     }
                     else
                     {
-                        globalKeyword.WordList.Add(kvp.Key, new GlobalStats(kvp.Value.Count));
+                        _globalKeyword.WordList.Add(kvp.Key, new GlobalStats(kvp.Value.Count));
                     }
                 }
                 Console.WriteLine("Total Keywords for this doc found = {0}", keywords[i].WordList.Count);
-                Console.WriteLine("Total Keywords  found = {0}", globalKeyword.WordList.Count);
+                Console.WriteLine("Total Keywords  found = {0}", _globalKeyword.WordList.Count);
             }
 
             //ok, so each document name is located in Files[]
             //each documents keywords are located in keyword[]
             //all of the keywords are located in globalKeyword for math purposes
 
-            double[,] holder = SimilarityBetweenDocuments(keywords.Select(c=>c as DocumentWordList).ToList(), globalKeyword);
+            double[,] holder = SimilarityBetweenDocuments(keywords.Select(c=>c as DocumentWordList).ToList(), _globalKeyword);
 
-            var queryHolder = SimilarityBetweenQueryAndDocuments("windows, azure".Split(',').ToList(), keywords.Select(c => c as DocumentWordList).ToList(), globalKeyword);
+            var queryHolder = SimilarityBetweenQueryAndDocuments("windows, azure".Split(',').ToList(), keywords.Select(c => c as DocumentWordList).ToList(), _globalKeyword);
 
             Console.WriteLine("Here are the results");
 
@@ -128,50 +121,29 @@ namespace WordSupport
 
             var dist = DistanceBetweenDocuments(keywords[0].WordList, keywords[1].WordList);
 
-            var termIFDIF1 = TermTfIdf("account", keywords[0], keywords.Select(c=>c as DocumentWordList).ToList(), globalKeyword);
+            var termIFDIF1 = TermTfIdf("account", keywords[0], keywords.Select(c=>c as DocumentWordList).ToList(), _globalKeyword);
 
-            return globalKeyword;
+            return _globalKeyword;
         }
 
-        ///// <summary>
-        ///// total docs analysed
-        ///// divided by number of docs that have term ti
-        ///// </summary>
-        ///// <param name="KeyVal"></param>
-        ///// <param name="allKeysWithGlobals"></param>
-        ///// <returns></returns>
-        //static double IDF(string KeyVal, List<DocumentWordList> allKeysWithGlobals)
-        //{
-        //    double retVal = 0;
-        //    int sum = 0;
-
-        //    foreach (var k in allKeysWithGlobals) //check each document to see if the word is contained
-        //    {
-        //        if (k.WordList[KeyVal].Count > 0)
-        //            sum++;
-        //    }
-
-        //    retVal = Math.Log10((double)allKeysWithGlobals.Count / (double)sum);
-
-        //    return retVal;
-        //}
-
-        static double TermTfIdf(string targetTerm, DocumentWordList targetDoc, List<DocumentWordList> allKeys, GlobalWordList globalKeywords)
+        double TermTfIdf(string targetTerm, DocumentWordList targetDoc, List<DocumentWordList> allKeys, GlobalWordList globalKeywords)
         {
             return TermTfIdf(targetTerm,
                 targetDoc.ToWordListWithGlobalEntries(globalKeywords),
                 allKeys.ToWordListWithGlobalEntries(globalKeywords));
         }
 
-        static double TermTfIdf(string keyVal, DocumentWordList targetDocWithGlobals, List<DocumentWordList> allKeysWithGlobals)
+        double TermTfIdf(string keyVal, DocumentWordList targetDocWithGlobals, List<DocumentWordList> allKeysWithGlobals)
         {
             //var tf = CalculateTFAdjustedForDocLength(TargetTerm.Key, targetDocWithGlobals);
-            var idf = IDF(keyVal, allKeysWithGlobals);
+            //var idf = IDF(keyVal, allKeysWithGlobals);
+
+            var idf = _globalKeyword.WordList[keyVal].IdfValue;
 
             return targetDocWithGlobals.WordList[keyVal].TFAdjustedForDocLength * idf;
         }
 
-        static Dictionary<string, double> TermTfIdf(string TargetTerm, List<DocumentWordList> allKeysWithGlobals)
+        Dictionary<string, double> TermTfIdf(string TargetTerm, List<DocumentWordList> allKeysWithGlobals)
         {
             var retValue = new Dictionary<string, double>(allKeysWithGlobals.Count);
 
@@ -181,7 +153,9 @@ namespace WordSupport
                 if (singleDocKeys.WordList.ContainsKey(TargetTerm))
                 {
                     //var tf = CalculateTFAdjustedForDocLength(TargetTerm, singleDocKeys);
-                    var idf = IDF(TargetTerm, allKeysWithGlobals);
+                    //var idf = IDF(TargetTerm, allKeysWithGlobals);
+                    
+                    var idf = _globalKeyword.WordList[TargetTerm].IdfValue;
                 }
                 retValue.Add(singleDocKeys.DataFile, result);
             }
@@ -189,7 +163,7 @@ namespace WordSupport
             return retValue;
         }
 
-        static Dictionary<string, double> DocumentTFIDF(DocumentWordList targetDic, List<DocumentWordList> allKeys)
+        Dictionary<string, double> DocumentTFIDF(DocumentWordList targetDic, List<DocumentWordList> allKeys)
         {
             var retVal = new Dictionary<string, double>(targetDic.WordList.Count);
             int i = 0;
@@ -197,7 +171,9 @@ namespace WordSupport
             foreach (KeyValuePair<string, WordStats> KVP in targetDic.WordList)
             {
                 //double TFval = CalculateTFAdjustedForDocLength(KVP.Key, allKeys[targetDoc]);
-                double IDFval = IDF(KVP.Key, allKeys);
+                //double IDFval = IDF(KVP.Key, allKeys);
+
+                var IDFval = _globalKeyword.WordList[KVP.Key].IdfValue;
 
                 retVal.Add(KVP.Key, KVP.Value.TFAdjustedForDocLength * IDFval);
                 i++;
@@ -206,7 +182,7 @@ namespace WordSupport
             return retVal;
         } 
 
-        static double[,] CalcSim(double[,] MatrixTFIDF, int N)
+        double[,] CalcSim(double[,] MatrixTFIDF, int N)
         {
             double[,] retVal = new double[N, N];
             Matrix A;
@@ -244,7 +220,7 @@ namespace WordSupport
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        static double Sim(Matrix a, Matrix b)
+        double Sim(Matrix a, Matrix b)
         {
             double retVal = 0;
 
@@ -258,7 +234,7 @@ namespace WordSupport
             return retVal = top / bot;
         }
 
-        static double[,] SimilarityBetweenDocuments(List<DocumentWordList> keywords, GlobalWordList globalKeywords)
+        double[,] SimilarityBetweenDocuments(List<DocumentWordList> keywords, GlobalWordList globalKeywords)
         {
             //for each file with some keywords
             //we will add in an entry for globalKeywords that were not found in the original file
@@ -286,7 +262,7 @@ namespace WordSupport
             return realRetVal;
         }
 
-        public static double[,] SimilarityBetweenQueryAndDocuments(List<string> queryWords, List<DocumentWordList> keywords, GlobalWordList globalKeywords)
+        public double[,] SimilarityBetweenQueryAndDocuments(List<string> queryWords, List<DocumentWordList> keywords, GlobalWordList globalKeywords)
         {
             //List<DocumentWordList> fileKeyWordsWithGlobalEntires = keywords.ToWordListWithGlobalEntries(globalKeywords);
 
@@ -312,7 +288,7 @@ namespace WordSupport
             return null;
         }
 
-        public static double DistanceBetweenDocuments(Dictionary<string, WordStats> d1, Dictionary<string, WordStats> d2)
+        public double DistanceBetweenDocuments(Dictionary<string, WordStats> d1, Dictionary<string, WordStats> d2)
         {
             double distance = 0;
             // Find the common words between documents

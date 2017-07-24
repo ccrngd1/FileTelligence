@@ -17,6 +17,7 @@ namespace WordSupport
     public class GlobalStats : WordStats
     {
         public double IdfValue { get; set; }
+
         public GlobalStats(int count) : base(count)
         {
 
@@ -58,6 +59,29 @@ namespace WordSupport
 
                 k.Value.IdfValue = Math.Log10((double) entireDocCorpus.Count / (double) sum);
             }
+        }
+        
+        ///// <summary>
+        ///// total docs analysed
+        ///// divided by number of docs that have term ti
+        ///// </summary>
+        ///// <param name="KeyVal"></param>
+        ///// <param name="allKeysWithGlobals"></param>
+        ///// <returns></returns>
+        double IDF(string KeyVal, List<DocumentWordList> allKeysWithGlobals)
+        {
+            double retVal = 0;
+            int sum = 0;
+
+            foreach (var k in allKeysWithGlobals) //check each document to see if the word is contained
+            {
+                if (k.WordList[KeyVal].Count > 0)
+                    sum++;
+            }
+
+            retVal = Math.Log10((double)allKeysWithGlobals.Count / (double)sum);
+
+            return retVal;
         }
     }
 
