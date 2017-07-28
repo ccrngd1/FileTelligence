@@ -17,8 +17,16 @@ namespace WordSupport
 
         public CorpusKeywordManager()
         {
-            _stopList =  new HashSet<string>();
+            _stopList = new HashSet<string>();
         }
+
+
+
+
+
+
+
+
 
         public bool ReadStopList(string file)
         {
@@ -47,14 +55,14 @@ namespace WordSupport
         public GlobalWordList Run(string directory, string resourceDirectory, string outputDirectory)
         {
             List<DocumentKeywords> keywords; //this will hold keywords for each file
-            
-            Scanner scanner = null; 
-            
+
+            Scanner scanner = null;
+
             var di = new DirectoryInfo(directory);
 
             FileInfo[] fi = di.GetFiles("*.txt");
 
-            keywords = new List<DocumentKeywords>(fi.Length); 
+            keywords = new List<DocumentKeywords>(fi.Length);
 
             ReadStopList(resourceDirectory + "stoplist.txt");
             ReadStopList(resourceDirectory + "CommonWords.txt");
@@ -104,7 +112,7 @@ namespace WordSupport
             //each documents keywords are located in keyword[]
             //all of the keywords are located in globalKeyword for math purposes
 
-            double[,] holder = SimilarityBetweenDocuments(keywords.Select(c=>c as DocumentWordList).ToList(), _globalKeyword);
+            double[,] holder = SimilarityBetweenDocuments(keywords.Select(c => c as DocumentWordList).ToList(), _globalKeyword);
 
             var queryHolder = SimilarityBetweenQueryAndDocuments("windows, azure".Split(',').ToList(), keywords.Select(c => c as DocumentWordList).ToList(), _globalKeyword);
 
@@ -121,10 +129,33 @@ namespace WordSupport
 
             var dist = DistanceBetweenDocuments(keywords[0].WordList, keywords[1].WordList);
 
-            var termIFDIF1 = TermTfIdf("account", keywords[0], keywords.Select(c=>c as DocumentWordList).ToList(), _globalKeyword);
+            var termIFDIF1 = TermTfIdf("account", keywords[0], keywords.Select(c => c as DocumentWordList).ToList(), _globalKeyword);
 
             return _globalKeyword;
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         double TermTfIdf(string targetTerm, DocumentWordList targetDoc, List<DocumentWordList> allKeys, GlobalWordList globalKeywords)
         {
@@ -154,7 +185,7 @@ namespace WordSupport
                 {
                     //var tf = CalculateTFAdjustedForDocLength(TargetTerm, singleDocKeys);
                     //var idf = IDF(TargetTerm, allKeysWithGlobals);
-                    
+
                     var idf = _globalKeyword.WordList[TargetTerm].IdfValue;
                 }
                 retValue.Add(singleDocKeys.DataFile, result);
@@ -180,7 +211,7 @@ namespace WordSupport
             }
 
             return retVal;
-        } 
+        }
 
         double[,] CalcSim(double[,] MatrixTFIDF, int N)
         {

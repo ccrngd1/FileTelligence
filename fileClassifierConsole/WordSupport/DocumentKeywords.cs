@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq; 
+using System.Linq;
 using NHunspell;
 
 namespace WordSupport
@@ -49,7 +49,7 @@ namespace WordSupport
         /// divided by number of docs that have term ti
         /// </summary>
         public void CalculateGlobalIDF(List<DocumentWordList> entireDocCorpus)
-        { 
+        {
 
             foreach (KeyValuePair<string, GlobalStats> k in WordList) //check each document to see if the word is contained
             {
@@ -57,10 +57,10 @@ namespace WordSupport
 
                 sum = entireDocCorpus.Count(c => c.WordList.ContainsKey(k.Key));
 
-                k.Value.IdfValue = Math.Log10((double) entireDocCorpus.Count / (double) sum);
+                k.Value.IdfValue = Math.Log10((double)entireDocCorpus.Count / (double)sum);
             }
         }
-        
+
         ///// <summary>
         ///// total docs analysed
         ///// divided by number of docs that have term ti
@@ -103,7 +103,7 @@ namespace WordSupport
             {
                 if (_wordsOrderedByCount == null || !_wordsOrderedByCount.Any())
                 {
-                    _wordsOrderedByCount = WordList.OrderByDescending(c => c.Value.Count).Select(d=>d.Key).ToList();
+                    _wordsOrderedByCount = WordList.OrderByDescending(c => c.Value.Count).Select(d => d.Key).ToList();
                 }
 
                 return _wordsOrderedByCount;
@@ -176,13 +176,13 @@ namespace WordSupport
     {
         #region Fields and Constructors 
         private readonly HashSet<string> _stopList;
-        private Hunspell _hunspell; 
+        private Hunspell _hunspell;
 
         public DocumentKeywords(HashSet<string> stopsList, Hunspell hunspellInst)
-        {  
+        {
             _stopList = stopsList;
             _hunspell = hunspellInst;
-        } 
+        }
 
         #endregion Fields and Constructors
 
@@ -211,7 +211,7 @@ namespace WordSupport
         public bool InsertWordsFromFile(string file, Scanner scanner, int _word, int _EOF, bool disposeHunspell)
         {
             if (scanner == null) return false;
-            DataFile = file; 
+            DataFile = file;
 
             Token t = scanner.Scan(); // get first token
 
@@ -297,7 +297,7 @@ namespace WordSupport
 
         #endregion Insert words into wordList methods
 
-        
+
 
         public void Dispose()
         {
