@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+
+using CSML;
 
 namespace WordSupport
 {
@@ -35,6 +37,59 @@ namespace WordSupport
             }
 
             return retVal = (double)N / (double)sum;
+        }
+
+
+        public static double[,] CalcSim(double[,] MatrixTFIDF, int N)
+        {
+            double[,] retVal = new double[N, N];
+            Matrix A;
+            Matrix B;
+
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = i; j < N; j++)
+                {
+                    if (j == i)
+                    { retVal[i, j] = 1; continue; }
+
+                    string temp = "";
+                    string temp2 = "";
+                    for (int k = 0; k < MatrixTFIDF.GetLength(1); k++)
+                    {
+                        temp += MatrixTFIDF[i, k].ToString() + ",";
+                        temp2 += MatrixTFIDF[j, k].ToString() + ",";
+                    }
+                    temp = temp.Remove(temp.Length - 1);
+                    temp2 = temp2.Remove(temp2.Length - 1);
+                    A = new Matrix(temp);
+                    B = new Matrix(temp2);
+
+                    retVal[i, j] = Sim(A, B);
+                }
+            }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// A.B / ||A|| ||B||
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static double Sim(Matrix a, Matrix b)
+        {
+            double retVal = 0;
+
+            double top = Matrix.Dot(a, b);
+
+            double Adot = Math.Sqrt(Matrix.Dot(a, a));
+            double Bdot = Math.Sqrt(Matrix.Dot(b, b));
+
+            double bot = Math.Sqrt(Matrix.Dot(a, a)) * Math.Sqrt(Matrix.Dot(b, b));
+
+            return retVal = top / bot;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace WordSupport.Extensions
     public static class KeywordsExt
     {
         /// <summary>
-        ///for each file with some keywords
+        ///for each file with some _keywords
         ///we will add in an entry for globalKeywords that were not found in the original file
         ///so we will have a lot of [key, 0] entries now
         /// </summary>

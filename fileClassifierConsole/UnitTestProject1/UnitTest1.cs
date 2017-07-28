@@ -77,6 +77,8 @@ namespace UnitTestProject1
         {
             var hRunner = new CorpusKeywordManager();
              hRunner.Run(Utilities.GetTrainingCorpusDirectory(), Utilities.GetResourcesDirectory(), AppDomain.CurrentDomain.BaseDirectory);
+
+            //hRunner.SimilarityBetweenQueryAndDocuments(new List<string> { "azure"},)
         }
     }
 }
