@@ -218,21 +218,7 @@ namespace WordSupport
             while (t.kind != _EOF)
             {
                 if (t.kind == _word) // word
-                {
-                    //List<string> stems = hunspell.Stem(t.val);
-                    //if (stems.Count > 0)
-                    //{
-                    //    if (!stopList.ContainsKey(stems[0]))
-                    //    {
-                    //        if (wordList.ContainsKey(stems[0]))
-                    //        {
-                    //            wordList[stems[0]]++;
-                    //        }
-                    //        else
-                    //            wordList.Add(stems[0], 1);
-                    //    }
-                    //}
-
+                { 
                     //this will insert the base word
                     //IE "will" instead of "willing"
                     //IE "be" instead of "being"

@@ -46,12 +46,12 @@ namespace UnitTestProject1
             }
         }
 
-        [TestMethod]
-        public void TestWordExtractionFromTxt()
-        {
-            WordExtraction we = new WordExtraction();
-            we.ExtractWords(Utilities.GetTrainingCorpusDirectory() + "MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.PDF.txt");
-        }
+        //[TestMethod]
+        //public void TestWordExtractionFromTxt()
+        //{
+        //    WordExtraction we = new WordExtraction();
+        //    we.ExtractWords(Utilities.GetTrainingCorpusDirectory() + "MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.PDF.txt");
+        //}
 
         [TestMethod]
         public void PopulateCommonWordsFromTxt()
@@ -61,16 +61,16 @@ namespace UnitTestProject1
             sant.PopulateCommonWords(Utilities.GetResourcesDirectory() + "CommonWords.txt");
         }
 
-        [TestMethod]
-        public void ExtractFromTxtPopulateCommonSanitizeCommon()
-        {
-            WordExtraction we = new WordExtraction();
-            we.ExtractWords(Utilities.GetTrainingCorpusDirectory() + "test.txt");
+        //[TestMethod]
+        //public void ExtractFromTxtPopulateCommonSanitizeCommon()
+        //{
+        //    WordExtraction we = new WordExtraction();
+        //    we.ExtractWords(Utilities.GetTrainingCorpusDirectory() + "MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.PDF.txt");
 
-            we.SetUpSantization(Utilities.GetResourcesDirectory() + "CommonWords.txt");
+        //    we.SetUpSantization(Utilities.GetResourcesDirectory() + "CommonWords.txt");
 
-            we.RemoveCommonGarbageWords();
-        }
+        //    we.RemoveCommonGarbageWords();
+        //}
 
         [TestMethod]
         public void TryHunspellRun()
