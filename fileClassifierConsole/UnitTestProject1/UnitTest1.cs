@@ -50,7 +50,7 @@ namespace UnitTestProject1
         public void TestWordExtractionFromTxt()
         {
             WordExtraction we = new WordExtraction();
-            we.ExtractWords("test.txt");
+            we.ExtractWords(Utilities.GetTrainingCorpusDirectory() + "MICROSOFT_PRESS_EBOOK_INTRODUCING_AZURE_PDF.PDF.txt");
         }
 
         [TestMethod]
@@ -78,7 +78,7 @@ namespace UnitTestProject1
             var hRunner = new CorpusKeywordManager();
              hRunner.Run(Utilities.GetTrainingCorpusDirectory(), Utilities.GetResourcesDirectory(), AppDomain.CurrentDomain.BaseDirectory);
 
-            //hRunner.SimilarityBetweenQueryAndDocuments(new List<string> { "azure"},)
+            hRunner.SimilarityBetweenQueryAndDocuments(new List<string> { "azure" });
         }
     }
 }

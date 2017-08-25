@@ -7,7 +7,13 @@ using WordSupport.Extensions;
 
 namespace WordSupport
 {
-    public class CorpusKeywordManager
+    public interface IUsableManager
+    {
+        bool ReadStopList(string file);
+        
+    }
+
+    public class CorpusKeywordManager : IUsableManager
     {
         private HashSet<string> _stopList;
         private GlobalWordList _globalKeyword = new GlobalWordList(); //this will hold all of the _keywords and their total count
@@ -44,7 +50,7 @@ namespace WordSupport
             return true;
         }
 
-        public GlobalWordList Run(string directory, string resourceDirectory, string outputDirectory)
+        public void Run(string directory, string resourceDirectory, string outputDirectory)
         {
             Scanner scanner = null;
 
@@ -102,7 +108,7 @@ namespace WordSupport
 
             double[,] holder = SimilarityBetweenDocuments();
 
-            var queryHolder = SimilarityBetweenQueryAndDocuments("windows, azure".Split(',').ToList(), _keywords.Select(c => c as DocumentWordList).ToList(), _globalKeyword);
+            //var queryHolder = SimilarityBetweenQueryAndDocuments("windows, azure".Split(',').ToList());
 
             Console.WriteLine("Here are the results");
 
@@ -117,19 +123,17 @@ namespace WordSupport
 
             var dist = DistanceBetweenDocuments(_keywords[0].WordList, _keywords[1].WordList);
 
-            var termIFDIF1 = TermTfIdf("account", _keywords[0], _keywords.Select(c => c as DocumentWordList).ToList(), _globalKeyword);
-
-            return _globalKeyword;
+            var termIFDIF1 = TermTfIdf("account", _keywords[0], _keywords.Select(c => c as DocumentWordList).ToList());
         }
 
-        double TermTfIdf(string targetTerm, DocumentWordList targetDoc, List<DocumentWordList> allKeys, GlobalWordList globalKeywords)
+        double TermTfIdf(string targetTerm, DocumentWordList targetDoc, List<DocumentWordList> allKeys)
         {
-            return TermTfIdf(targetTerm,
-                targetDoc.ToWordListWithGlobalEntries(globalKeywords),
-                allKeys.ToWordListWithGlobalEntries(globalKeywords));
+            return TermTfIdf2(targetTerm,
+                targetDoc.ToWordListWithGlobalEntries(_globalKeyword),
+                allKeys.ToWordListWithGlobalEntries(_globalKeyword));
         }
 
-        double TermTfIdf(string keyVal, DocumentWordList targetDocWithGlobals, List<DocumentWordList> allKeysWithGlobals)
+        double TermTfIdf2(string keyVal, DocumentWordList targetDocWithGlobals, List<DocumentWordList> allKeysWithGlobals)
         {
             //var tf = CalculateTFAdjustedForDocLength(TargetTerm.Key, targetDocWithGlobals);
             //var idf = IDF(keyVal, allKeysWithGlobals);
@@ -159,7 +163,7 @@ namespace WordSupport
             return retValue;
         }
 
-        Dictionary<string, double> DocumentTFIDF(DocumentWordList targetDic, List<DocumentWordList> allKeys)
+        public Dictionary<string, double> DocumentTFIDF(DocumentWordList targetDic, List<DocumentWordList> allKeys)
         {
             var retVal = new Dictionary<string, double>(targetDic.WordList.Count);
             int i = 0;
@@ -206,28 +210,30 @@ namespace WordSupport
             return realRetVal;
         }
 
-        public double[,] SimilarityBetweenQueryAndDocuments(List<string> queryWords, List<DocumentWordList> keywords, GlobalWordList globalKeywords)
+        public double[,] SimilarityBetweenQueryAndDocuments(List<string> queryWords)
         {
-            //List<DocumentWordList> fileKeyWordsWithGlobalEntires = _keywords.ToWordListWithGlobalEntries(globalKeywords);
+            var keywords = _keywords.Select(c => c as DocumentWordList).ToList();
 
-            //var tempCalc = new double[queryWords.Count, globalKeywords.WordList.Count];
+            List<DocumentWordList> fileKeyWordsWithGlobalEntires = keywords.ToWordListWithGlobalEntries(_globalKeyword);
 
-            //for (var i = 0; i < queryWords.Count; i++)
-            //{
-            //    Dictionary<string, double> temp = DocumentTFIDF(queryWords[i], fileKeyWordsWithGlobalEntires);
+            var tempCalc = new double[queryWords.Count, _globalKeyword.WordList.Count];
 
-            //    int j = 0;
+            for (var i = 0; i < queryWords.Count; i++)
+            {
+                Dictionary<string, double> temp = TermTfIdf(queryWords[i], fileKeyWordsWithGlobalEntires);
 
-            //    foreach (KeyValuePair<string, double> keyValuePair in temp)
-            //    {
-            //        tempCalc[i, j] = keyValuePair.Value;
-            //        j++;
-            //    }
-            //}
+                int j = 0;
 
-            //double[,] realRetVal = CalcSim(tempCalc, queryWords.Count);
+                foreach (KeyValuePair<string, double> keyValuePair in temp)
+                {
+                    tempCalc[i, j] = keyValuePair.Value;
+                    j++;
+                }
+            }
 
-            //return realRetVal;
+            double[,] realRetVal = Utilities.CalcSim(tempCalc, queryWords.Count);
+
+            return realRetVal;
 
             return null;
         }
