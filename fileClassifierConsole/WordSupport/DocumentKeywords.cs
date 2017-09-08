@@ -93,7 +93,7 @@ namespace WordSupport
         }
 
         public string DataFile { get; set; }
-        public Dictionary<string, WordStats> WordList { get; private set; }
+        public Dictionary<string, WordStats> WordList { get; internal set; }
 
         private List<string> _wordsOrderedByCount = new List<string>();
 

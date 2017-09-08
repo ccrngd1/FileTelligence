@@ -7,6 +7,7 @@ using WordSupport.Extensions;
 
 namespace WordSupport
 {
+
     public interface IUsableManager
     {
         bool ReadStopList(string file);
@@ -15,6 +16,8 @@ namespace WordSupport
 
     public class CorpusKeywordManager : IUsableManager
     {
+        public const string compiledDataExtension = "FCC_HunspellWEResult";
+
         private HashSet<string> _stopList;
         private GlobalWordList _globalKeyword = new GlobalWordList(); //this will hold all of the _keywords and their total count
 
@@ -52,55 +55,7 @@ namespace WordSupport
 
         public void Run(string directory, string resourceDirectory, string outputDirectory)
         {
-            Scanner scanner = null;
-
-            var di = new DirectoryInfo(directory);
-
-            FileInfo[] fi = di.GetFiles("*.txt");
-
-            ReadStopList(resourceDirectory + "stoplist.txt");
-            ReadStopList(resourceDirectory + "CommonWords.txt");
-
-            hunspell = new Hunspell(resourceDirectory + "en_us.aff", resourceDirectory + "en_us.dic");
-
-            //do the counting for every file, to fill the keyword instances
-            //will also increase count for the global count
-            foreach(var f in fi)
-            {
-                var tempKW = new DocumentKeywords(_stopList, hunspell);
-                _keywords.Add(tempKW);
-
-                try
-                {
-                    scanner = new Scanner(f.FullName);
-                }
-                catch
-                {
-                    Console.WriteLine("File {0} doesn't exist.", f.FullName);
-                    continue;
-                }
-
-                if (tempKW.InsertWordsFromFile(f.FullName, scanner, Parser._word, Parser._EOF, false))
-                {
-                    //Console.WriteLine("There are {0} words in {1}", keyword[i].WordList.Count, fi[i].FullName);
-                    //Console.WriteLine("Write word counts to " + fi[i].Name + ".wc");
-                    tempKW.WriteWordList(outputDirectory + "\\Results\\", f.Name + ".wc");
-                }
-
-                foreach (KeyValuePair<string, WordStats> kvp in tempKW.WordList)
-                {
-                    if (_globalKeyword.WordList.ContainsKey(kvp.Key))
-                    {
-                        _globalKeyword.WordList[kvp.Key].Count += kvp.Value.Count;
-                    }
-                    else
-                    {
-                        _globalKeyword.WordList.Add(kvp.Key, new GlobalStats(kvp.Value.Count));
-                    }
-                }
-                Console.WriteLine("Total Keywords for this doc found = {0}", tempKW.WordList.Count);
-                Console.WriteLine("Total Keywords  found = {0}", _globalKeyword.WordList.Count);
-            }
+            WordExtraction(directory, resourceDirectory, outputDirectory);
 
             //ok, so each document name is located in Files[]
             //each documents _keywords are located in keyword[]
@@ -124,6 +79,88 @@ namespace WordSupport
             var dist = DistanceBetweenDocuments(_keywords[0].WordList, _keywords[1].WordList);
 
             var termIFDIF1 = TermTfIdf("account", _keywords[0], _keywords.Select(c => c as DocumentWordList).ToList());
+        }
+
+        public void WordExtraction(string directory, string resourceDirectory, string outputDirectory)
+        {
+            Scanner scanner = null;
+            
+            ReadStopList(resourceDirectory + "stoplist.txt");
+            ReadStopList(resourceDirectory + "CommonWords.txt");
+
+            hunspell = new Hunspell(resourceDirectory + "en_us.aff", resourceDirectory + "en_us.dic");
+
+            //do the counting for every file, to fill the keyword instances
+            //will also increase count for the global count
+            foreach (var f in new System.IO.DirectoryInfo(directory).EnumerateFiles())
+            {
+                if (!f.Name.ToLower().EndsWith(".pdf") && !f.Name.ToLower().EndsWith(compiledDataExtension))
+                    continue; //only read pdf files and pre-computed data files
+
+                var tempKW = new DocumentKeywords(_stopList, hunspell);
+                _keywords.Add(tempKW);
+
+                if (File.Exists(f.Name + "."+ compiledDataExtension))
+                {
+                    tempKW.DataFile = f.Name;
+
+                    using(var sr = File.OpenText(f.Name + "." + compiledDataExtension))
+                    {
+                        var jsoned = sr.ReadToEnd();
+
+                        tempKW.WordList = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, WordStats>>(jsoned);
+                    }
+
+                    continue;
+                }
+
+                IPdfExtraction pClass = new Pdf();
+
+                if (System.IO.File.Exists(f.Name + ".txt."))
+                    System.IO.File.Delete(f.Name + ".txt.");
+
+                string extractLocation = f.DirectoryName + "\\" + f.Name + ".txt.";
+
+                pClass.ExtractText(f.FullName, f.DirectoryName+"\\" + f.Name + ".txt.");
+                
+                try
+                {
+                    scanner = new Scanner(extractLocation);
+                }
+                catch
+                {
+                    Console.WriteLine("File {0} doesn't exist.", extractLocation);
+                    continue;
+                }
+
+                if (tempKW.InsertWordsFromFile(extractLocation, scanner, Parser._word, Parser._EOF, false))
+                {
+                    var jsonoutput = Newtonsoft.Json.JsonConvert.SerializeObject(tempKW.WordList, Newtonsoft.Json.Formatting.Indented);
+
+                    using (StreamWriter sw = new StreamWriter(f.FullName + "." + compiledDataExtension))
+                    {
+                        sw.Write(jsonoutput);
+                        sw.Flush();
+                    }
+
+                    System.IO.File.Delete(f.Name + ".txt.");
+                }
+
+                foreach (KeyValuePair<string, WordStats> kvp in tempKW.WordList)
+                {
+                    if (_globalKeyword.WordList.ContainsKey(kvp.Key))
+                    {
+                        _globalKeyword.WordList[kvp.Key].Count += kvp.Value.Count;
+                    }
+                    else
+                    {
+                        _globalKeyword.WordList.Add(kvp.Key, new GlobalStats(kvp.Value.Count));
+                    }
+                }
+
+                Console.WriteLine("Total Keywords for this doc found = {0}", tempKW.WordList.Count);
+                Console.WriteLine("Total Keywords  found = {0}", _globalKeyword.WordList.Count);                
+            }
         }
 
         double TermTfIdf(string targetTerm, DocumentWordList targetDoc, List<DocumentWordList> allKeys)

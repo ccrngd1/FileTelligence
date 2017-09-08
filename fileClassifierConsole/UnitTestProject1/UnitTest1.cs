@@ -55,7 +55,7 @@ namespace UnitTestProject1
 
         [TestMethod]
         public void PopulateCommonWordsFromTxt()
-        {
+        { 
             Sanitizing sant = new Sanitizing();
 
             sant.PopulateCommonWords(Utilities.GetResourcesDirectory() + "CommonWords.txt");
@@ -79,6 +79,14 @@ namespace UnitTestProject1
              hRunner.Run(Utilities.GetTrainingCorpusDirectory(), Utilities.GetResourcesDirectory(), AppDomain.CurrentDomain.BaseDirectory);
 
             hRunner.SimilarityBetweenQueryAndDocuments(new List<string> { "azure" });
+        }
+
+        [TestMethod]
+        public void TryHunspellWordExtraction()
+        {
+            var hRunner = new CorpusKeywordManager();
+            hRunner.WordExtraction(Utilities.GetTrainingCorpusDirectory(), Utilities.GetResourcesDirectory(), AppDomain.CurrentDomain.BaseDirectory);
+
         }
     }
 }
