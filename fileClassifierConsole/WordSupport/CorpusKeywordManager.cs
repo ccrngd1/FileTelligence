@@ -100,9 +100,9 @@ namespace WordSupport
                 var tempKW = new DocumentKeywords(_stopList, hunspell);
                 _keywords.Add(tempKW);
 
-                if (File.Exists(f.Name + "."+ compiledDataExtension))
+                if (File.Exists(f.Name + "."+ compiledDataExtension)) //if this same file name exists with our fileExtension, just read in the metadata file
                 {
-                    tempKW.DataFile = f.Name;
+                    tempKW.DataFile = f.Name; //set it to the file name it should have been
 
                     using(var sr = File.OpenText(f.Name + "." + compiledDataExtension))
                     {
